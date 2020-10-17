@@ -5,6 +5,8 @@ W_total = 35; %total weight (lbs)
 W_sec = (2/3)*(W_total); %weight of heaviest section
 m_sec = (W_sec)/(32.174); %mass of heaviest section
 p = 0.002376; %density of air
+m_payload = 0.0226807; %mass of payload (slugs)
+W_payload = 0.729729946234; %weight of payload (lbs)
 
 %   Main Parachute Constants:
 Cd_main = 2.2;
@@ -12,7 +14,6 @@ A_adj_main = 0.96;
 r_main = 4.631; %min radius of main to achieve terminal velocity
 D_main = 4;
 A_main = 0.96*pi*(D_main/2)^2;
-
 
 %   Drogue Parachute Constants:
 Cd_drogue = 1.5;
@@ -25,6 +26,10 @@ A_drogue = 0.96*pi*(D_drogue/2)^2;
 v_t_drogue = sqrt((2*W_total)/(A_drogue*Cd_drogue*p));
 v_t_main = sqrt((2*W_total)/(A_main*Cd_main*p));
 v_t_both = sqrt((2*W_total)/(p*(A_drogue*Cd_drogue+A_main*Cd_main)));
+%       Terminal velocities after payload release:
+v_t_drogue_wo_load = sqrt((2*(W_total-W_payload))/(A_drogue*Cd_drogue*p));
+v_t_main_wo_load = sqrt((2*(W_total-W_payload))/(A_main*Cd_main*p));
+v_t_both_wo_load = sqrt((2*(W_total-W_payload))/(p*(A_drogue*Cd_drogue+A_main*Cd_main)));
 
 
 
@@ -48,6 +53,9 @@ v_t_both = sqrt((2*W_total)/(p*(A_drogue*Cd_drogue+A_main*Cd_main)));
 
 
 %Kinetic Energy:
+
+%   KE at landing:
+KE_landing =(1/2)*((m_sec)*(v_t_both^2));
 
 
 %Descent:
