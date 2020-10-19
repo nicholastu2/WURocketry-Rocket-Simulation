@@ -7,6 +7,17 @@ m_sec = (W_sec)/(32.174); %mass of heaviest section
 p = 0.002376; %density of air
 m_payload = 0.0226807; %mass of payload (slugs)
 W_payload = 0.729729946234; %weight of payload (lbs)
+fight_angle = 7.5;
+diameter = 5.5;
+CP = 76;
+CG = 64;
+dist_forward_section = 49.5;
+dist_mid_section = dist_forward_section + 24;
+dist_aft_section = dist_mid_section + 31.5;
+W_nosecone = 2.875;
+W_forward_section = W_payload + W_nosecone;
+
+
 
 %   Main Parachute Constants:
 Cd_main = 2.2;
@@ -44,6 +55,7 @@ v_t_both_wo_load = sqrt((2*(W_total-W_payload))/(p*(A_drogue*Cd_drogue+A_main*Cd
 
 
 %Stability Margin:
+stability_margin = (CP - CG)/diameter;
 
 
 %Center of Pressure:
@@ -55,7 +67,7 @@ v_t_both_wo_load = sqrt((2*(W_total-W_payload))/(p*(A_drogue*Cd_drogue+A_main*Cd
 %Kinetic Energy:
 
 %   KE at landing:
-KE_landing =(1/2)*((m_sec)*(v_t_both^2));
+KE_landing =(1/2)*((m_sec - m_payload)*(v_t_both^2));
 
 
 %Descent:
