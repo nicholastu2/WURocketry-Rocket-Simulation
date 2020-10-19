@@ -9,13 +9,30 @@ m_payload = 0.0226807; %mass of payload (slugs)
 W_payload = 0.729729946234; %weight of payload (lbs)
 fight_angle = 7.5;
 diameter = 5.5;
+length_nose = 10;
 CP = 76;
+numFins = 3;
 CG = 64;
-dist_forward_section = 49.5;
-dist_mid_section = dist_forward_section + 24;
-dist_aft_section = dist_mid_section + 31.5;
+length_forward_section = 49.5;
+length_mid_section = length_forward_section + 24;
+length_aft_section = length_mid_section + 31.5;
+m_avionics = 0.03558663858462;%slugs
 W_nosecone = 2.875;
 W_forward_section = W_payload + W_nosecone;
+m_main_parachute = 0.04273634; %mass of main parachute in slugs
+
+%need to find:
+%   W_forward_section = 
+%       W_weighted_ballast + 
+%       W_payload_deployment_mech
+%   W_mid_section = 
+%       W_top_avionics_bay + 
+%       W_main_parachute
+%   W_aft_section = 
+%       W_drogue_parachute + 
+%       W_top_avionics_bay + 
+%       W_air_brake
+
 
 
 
@@ -37,7 +54,7 @@ A_drogue = 0.96*pi*(D_drogue/2)^2;
 v_t_drogue = sqrt((2*W_total)/(A_drogue*Cd_drogue*p));
 v_t_main = sqrt((2*W_total)/(A_main*Cd_main*p));
 v_t_both = sqrt((2*W_total)/(p*(A_drogue*Cd_drogue+A_main*Cd_main)));
-%       Terminal velocities after payload release:
+%       Terminal velocities after payload release (probably won't need):
 v_t_drogue_wo_load = sqrt((2*(W_total-W_payload))/(A_drogue*Cd_drogue*p));
 v_t_main_wo_load = sqrt((2*(W_total-W_payload))/(A_main*Cd_main*p));
 v_t_both_wo_load = sqrt((2*(W_total-W_payload))/(p*(A_drogue*Cd_drogue+A_main*Cd_main)));
