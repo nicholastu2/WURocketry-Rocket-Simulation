@@ -1,4 +1,5 @@
 %Constants:
+t = 0;
 m_total = 1.087; %total mass (slugs)
 g = 32.17405; %accel due to gravity (ft/s^2)
 W_total = 35; %total weight (lbs)
@@ -7,7 +8,7 @@ m_sec = (W_sec)/(32.174); %mass of heaviest section
 p = 0.002376; %density of air
 m_payload = 0.0226807; %mass of payload (slugs)
 W_payload = 0.729729946234; %weight of payload (lbs)
-fight_angle = 7.5;
+launch_angle = 7.5;
 diameter = 5.5;
 length_nose = 10;
 CP = 76;
@@ -20,6 +21,10 @@ m_avionics = 0.03558663858462;%slugs
 W_nosecone = 2.875;
 W_forward_section = W_payload + W_nosecone;
 m_main_parachute = 0.04273634; %mass of main parachute in slugs
+drogue_deployment_height = 5250;
+main_deployment_height = 600;
+C_d_air;
+
 
 %need to find:
 %   W_forward_section = 
@@ -32,6 +37,13 @@ m_main_parachute = 0.04273634; %mass of main parachute in slugs
 %       W_drogue_parachute + 
 %       W_top_avionics_bay + 
 %       W_air_brake
+W_fuel;
+rate_fuel_consumption = W_fuel / 3.5;
+
+lift_force;
+
+% will be calculated in script:
+apogee;
 
 
 
@@ -68,7 +80,43 @@ v_t_both_wo_load = sqrt((2*(W_total-W_payload))/(p*(A_drogue*Cd_drogue+A_main*Cd
 
 
 
-%Rocket Flight:
+%Rocket Flight (ascent):
+F_g = m_total* g;
+F_thrust;
+F_thrust_average = 1300;
+F_thrust_y = F_thrust_average * cos(launch_angle);
+h_current = 0;
+
+
+%   first 3.5 seconds:
+F_y = F_thrust_y - F_g;
+a_y_current = F_y / m_total;
+v_y_current = 0;
+v_x_current = 0;
+
+while t < 3.5
+    t = t + 0.1;
+    m_total = m_total - (rate_fuel_consumption*10 * t);
+    F_d_ascent = (1/2)*C_d_air*A_rocket*p*(a_y_current*t)^2;
+    F_y = F_y - F_d_ascent;
+    a_y_current = F_y / m_total;%m_total will change with time since fuel is being used up
+    v_y_current = a_y_current * t;
+    h_current = h_current + v_y_current*(t-(t-0.1)) + (1/2)*(a_y_current)*((t-(t-0.1)))^2;
+    KE_ascent = (1/2)*(m_total)*v_y_current;
+    U_ascent = m_total*g*h_current;
+    E_rocket = KE_ascent+U_ascent;
+end
+
+
+%after thrust is done;
+F_y = ((-1)*F_g) - F_d_ascent;
+a_y_current = F_y / m_total;
+
+while v_y_current ~= 0
+    t = t+0.1;
+    
+    
+end
 
 
 %Stability Margin:
