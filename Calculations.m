@@ -113,7 +113,8 @@ while t < 3.5
     m_total = m_total - (rate_fuel_consumption*(1/delta_t) * t);
     F_g_start = m_total * g;
     F_d_ascent = (1/2)*C_d_air*A_rocket*p_height*(a_y_current*t)^2;
-    F_y = F_thrust_y - (m_total*g) - F_d_ascent;
+    F_d_ascent_y = (1/2)*C_d_air*A_rocket*p_height*(a_y_current*t)^2 * cos(launch_angle);
+    F_y = F_thrust_y - (m_total*g) - F_d_ascent_y;
     a_y_current = F_y / m_total;%m_total will change with time since fuel is being used up
     h_current = h_current + v_y_current*(delta_t) + (1/2)*(a_y_current)*(delta_t)^2;
     p_height = p*(1 - (L*h)/288.15)^((g*M)/(R*L));
