@@ -85,19 +85,20 @@ v_t_both_wo_load = sqrt((2*(W_total-W_payload))/(p*(A_drogue*Cd_drogue+A_main*Cd
 
 
 %Rocket Flight (ascent):
-F_g = m_total* g;
+F_g_start = m_total* g;
 F_thrust;
 F_thrust_average = 1300;
 F_thrust_y = F_thrust_average * cos(launch_angle);
 h_current = 0;
 F_d_ascent;
+A_rocket = 0.96*pi*(diameter / 2)^2;
 
 
 %   first 3.5 seconds:
-F_y = F_thrust_y - F_g;
-a_y_current;
-v_y_current = 0;
-v_x_current = 0;
+F_y_start = F_thrust_y - F_g_start;
+a_y_start = F_y_start / m_total;
+v_y_start = 0;
+v_x_start = 0;
 delta_t = 0.1;
 
 % atmospheric pressure constant:
@@ -106,15 +107,17 @@ T = 288.15 - L*h_current;
 R = 0.730240507295273; %ideal gas constant
 M = 53.35; %Molar mass of dry air
 
-
+%simulates the flight with thrust
 while t < 3.5 
     t = t + delta_t;
     m_total = m_total - (rate_fuel_consumption*(1/delta_t) * t);
+    F_g_start = m_total * g;
+    F_d_ascent = (1/2)*C_d_air*A_rocket*p_height*(a_y_current*t)^2;
+    F_y = F_thrust_y - (m_total*g) - F_d_ascent;
     a_y_current = F_y / m_total;%m_total will change with time since fuel is being used up
     h_current = h_current + v_y_current*(delta_t) + (1/2)*(a_y_current)*(delta_t)^2;
     p_height = p*(1 - (L*h)/288.15)^((g*M)/(R*L));
-    F_d_ascent = (1/2)*C_d_air*A_rocket*p_height*(a_y_current*t)^2;
-    F_y = F_y - F_d_ascent;
+
 
     v_y_current = a_y_current * t;
 
@@ -126,13 +129,16 @@ end
 
 
 %after thrust is done;
-F_y = ((-1)*F_g) - F_d_ascent;
+F_y = ((-1)*(m_total*g)) - F_d_ascent;
 a_y_current = F_y / m_total;
 
 while v_y_current ~= 0
     t = t+delta_t;
     v_y_current = v_y_current + a_y_current * t;
+    h_current = h_current + v_y_current*delta_t;
 end
+
+apogee = v_y_current;
 
 
 %Stability Margin:
