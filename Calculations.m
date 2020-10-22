@@ -2,7 +2,7 @@
 t = 0;
 m_total = 1.087; %total mass (slugs)
 g = 32.17405; %accel due to gravity (ft/s^2)
-W_total = 35; %total weight (lbs)
+W_total = 40; %total weight (wet) (lbs)
 W_sec = (2/3)*(W_total); %weight of heaviest section
 m_sec = (W_sec)/(32.174); %mass of heaviest section
 p = 0.002376; %density of air at sea level
@@ -23,6 +23,7 @@ W_forward_section = W_payload + W_nosecone;
 m_main_parachute = 0.04273634; %mass of main parachute in slugs
 drogue_deployment_height = 5250;
 main_deployment_height = 600;
+C_d_rocket = 0.75;
 
 
 %questions:
@@ -41,13 +42,10 @@ main_deployment_height = 600;
 %       W_drogue_parachute + 
 %       W_top_avionics_bay + 
 %       W_air_brake
-W_fuel;
+W_fuel = 5.52; %weight of propellant in lbs
 rate_fuel_consumption = W_fuel / 3.5;
-C_d_air;
-lift_force;
 
 % will be calculated in script:
-apogee;
 
 
 
@@ -85,18 +83,17 @@ v_t_both_wo_load = sqrt((2*(W_total-W_payload))/(p*(A_drogue*Cd_drogue+A_main*Cd
 
 
 %Rocket Flight (ascent):
-F_g_start = m_total* g;
-F_thrust;
-F_thrust_average = 1300;
-F_thrust_y = F_thrust_average * cos(launch_angle);
+F_g_current = m_total* g;
+F_thrust_average = 1304.85;
+F_thrust_y = F_thrust_average * cosd(launch_angle);
 h_current = 0;
-F_d_ascent;
 A_rocket = 0.96*pi*(diameter / 2)^2;
+v_y_current = 0;
 
 
 %   first 3.5 seconds:
-F_y_start = F_thrust_y - F_g_start;
-a_y_start = F_y_start / m_total;
+F_y_start = F_thrust_y - F_g_current;
+a_y_current = F_y_start / m_total;
 v_y_start = 0;
 v_x_start = 0;
 delta_t = 0.1;
@@ -111,13 +108,14 @@ M = 53.35; %Molar mass of dry air
 while t < 3.5 
     t = t + delta_t;
     m_total = m_total - (rate_fuel_consumption*(1/delta_t) * t);
-    F_g_start = m_total * g;
-    F_d_ascent = (1/2)*C_d_air*A_rocket*p_height*(a_y_current*t)^2;
-    F_d_ascent_y = (1/2)*C_d_air*A_rocket*p_height*(a_y_current*t)^2 * cos(launch_angle);
-    F_y = F_thrust_y - (m_total*g) - F_d_ascent_y;
-    a_y_current = F_y / m_total;%m_total will change with time since fuel is being used up
+    F_g_current = m_total * g;
+    p_height = p*(1 - (L*h_current)/288.15)^((g*M)/(R*L));
+    F_d_ascent = (1/2)*C_d_rocket*A_rocket*p_height*(a_y_current*t)^2;
+    F_d_ascent_y = (1/2)*C_d_rocket*A_rocket*p_height*(a_y_current*t)^2 * cos(launch_angle);
+    F_y_start = F_thrust_y - (m_total*g) - F_d_ascent_y;
+    a_y_current = F_y_start / m_total;%m_total will change with time since fuel is being used up
     h_current = h_current + v_y_current*(delta_t) + (1/2)*(a_y_current)*(delta_t)^2;
-    p_height = p*(1 - (L*h)/288.15)^((g*M)/(R*L));
+
 
 
     v_y_current = a_y_current * t;
@@ -130,10 +128,10 @@ end
 
 
 %after thrust is done;
-F_y = ((-1)*(m_total*g)) - F_d_ascent;
-a_y_current = F_y / m_total;
+F_y_start = ((-1)*(m_total*g)) - F_d_ascent;
+a_y_current = F_y_start / m_total;
 
-while v_y_current ~= 0
+while v_y_current <= 0
     t = t+delta_t;
     v_y_current = v_y_current + a_y_current * t;
     h_current = h_current + v_y_current*delta_t;
