@@ -1,5 +1,4 @@
 %Constants:
-t = 0;
 m_total = 1.087; %total mass (slugs)
 g = 32.17405; %accel due to gravity (ft/s^2)
 W_total = 40; %total weight (wet) (lbs)
@@ -85,11 +84,12 @@ v_t_both_wo_load = sqrt((2*(W_total-W_payload))/(p*(A_drogue*Cd_drogue+A_main*Cd
 
 %Rocket Flight (ascent):
 F_g_current = m_total* g;
-F_thrust_average = 1304.85;
+F_thrust_average = 293.3419504;%average thrust force in lbf
 F_thrust_y = F_thrust_average * cosd(launch_angle);
 h_current = 0;
-A_rocket = 0.96*pi*(diameter / 2)^2;
+A_rocket = 0.96*pi*(diameter / 2)^2;%affective area of rocket
 v_y_current = 0;
+t = 0;
 
 
 %   first 3.5 seconds:
@@ -103,6 +103,8 @@ L = 0.0065;
 T = 288.15 - L*h_current;
 R = 0.730240507295273; %ideal gas constant
 M = 53.35; %Molar mass of dry air
+
+
 
 %simulates the flight with thrust
 while t < 3.5 
