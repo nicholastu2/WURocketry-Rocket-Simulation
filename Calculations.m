@@ -43,7 +43,8 @@ C_d_rocket = 0.75;
 %       W_top_avionics_bay + 
 %       W_air_brake
 W_fuel = 5.52; %weight of propellant in lbs
-rate_fuel_consumption = W_fuel / 3.5;
+m_fuel = W_fuel / 32.174;
+rate_fuel_consumption = m_fuel / 3.5;
 
 % will be calculated in script:
 
@@ -94,8 +95,7 @@ v_y_current = 0;
 %   first 3.5 seconds:
 F_y_start = F_thrust_y - F_g_current;
 a_y_current = F_y_start / m_total;
-v_y_start = 0;
-v_x_start = 0;
+v_x_current = 0;
 delta_t = 0.1;
 
 % atmospheric pressure constant:
@@ -107,13 +107,14 @@ M = 53.35; %Molar mass of dry air
 %simulates the flight with thrust
 while t < 3.5 
     t = t + delta_t;
-    m_total = m_total - (rate_fuel_consumption*(1/delta_t) * t);
+    m_total = m_total - (rate_fuel_consumption * (delta_t));
+    a_y_current = F_y_start / m_total;%m_total will change with time since fuel is being used up
     F_g_current = m_total * g;
     p_height = p*(1 - (L*h_current)/288.15)^((g*M)/(R*L));
     F_d_ascent = (1/2)*C_d_rocket*A_rocket*p_height*(a_y_current*t)^2;
     F_d_ascent_y = (1/2)*C_d_rocket*A_rocket*p_height*(a_y_current*t)^2 * cos(launch_angle);
     F_y_start = F_thrust_y - (m_total*g) - F_d_ascent_y;
-    a_y_current = F_y_start / m_total;%m_total will change with time since fuel is being used up
+
     h_current = h_current + v_y_current*(delta_t) + (1/2)*(a_y_current)*(delta_t)^2;
 
 
@@ -131,7 +132,7 @@ end
 F_y_start = ((-1)*(m_total*g)) - F_d_ascent;
 a_y_current = F_y_start / m_total;
 
-while v_y_current <= 0
+while v_y_current >= 0
     t = t+delta_t;
     v_y_current = v_y_current + a_y_current * t;
     h_current = h_current + v_y_current*delta_t;
