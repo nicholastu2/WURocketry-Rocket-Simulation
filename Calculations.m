@@ -129,12 +129,12 @@ end
 
 
 %after thrust is done;
-F_y_start = ((-1)*(m_total*g)) - F_d_ascent;
-a_y_current = F_y_start / m_total;
+F_y_after_thrust = ((-1)*(m_total*g)) - F_d_ascent;
+a_y_after_thrust = F_y_start / m_total;
 
 while v_y_current >= 0
     t = t+delta_t;
-    v_y_current = v_y_current + a_y_current * t;
+    v_y_current = v_y_current + a_y_after_thrust * t;
     h_current = h_current + v_y_current*delta_t;
 end
 
