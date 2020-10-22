@@ -139,7 +139,7 @@ while v_y_current ~= 0
     h_current = h_current + v_y_current*delta_t;
 end
 
-apogee = v_y_current;
+apogee = h_current;
 
 
 %Stability Margin:
