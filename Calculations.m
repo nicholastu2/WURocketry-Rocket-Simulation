@@ -4,7 +4,7 @@ g = 32.17405; %accel due to gravity (ft/s^2)
 W_total = 40; %total weight (wet) (lbs)
 W_sec = (2/3)*(W_total); %weight of heaviest section
 m_sec = (W_sec)/(32.174); %mass of heaviest section
-p = 0.002376; %density of air at sea level
+air_density = 0.002376; %density of air at sea level
 m_payload = 0.0226807; %mass of payload (slugs)
 W_payload = 0.729729946234; %weight of payload (lbs)
 launch_angle = 7.5;
@@ -23,6 +23,7 @@ m_main_parachute = 0.04273634; %mass of main parachute in slugs
 drogue_deployment_height = 5250;
 main_deployment_height = 600;
 C_d_rocket = 0.75;
+air_temp = 295.55; %air temperature in kelvins
 
 
 %questions:
@@ -65,13 +66,13 @@ D_drogue = 15/12;
 A_drogue = 0.96*pi*(D_drogue/2)^2;
 
 %   Terminal velocities:
-v_t_drogue = sqrt((2*W_total)/(A_drogue*Cd_drogue*p));
-v_t_main = sqrt((2*W_total)/(A_main*Cd_main*p));
-v_t_both = sqrt((2*W_total)/(p*(A_drogue*Cd_drogue+A_main*Cd_main)));
+v_t_drogue = sqrt((2*W_total)/(A_drogue*Cd_drogue*air_density));
+v_t_main = sqrt((2*W_total)/(A_main*Cd_main*air_density));
+v_t_both = sqrt((2*W_total)/(air_density*(A_drogue*Cd_drogue+A_main*Cd_main)));
 %       Terminal velocities after payload release (probably won't need):
-v_t_drogue_wo_load = sqrt((2*(W_total-W_payload))/(A_drogue*Cd_drogue*p));
-v_t_main_wo_load = sqrt((2*(W_total-W_payload))/(A_main*Cd_main*p));
-v_t_both_wo_load = sqrt((2*(W_total-W_payload))/(p*(A_drogue*Cd_drogue+A_main*Cd_main)));
+v_t_drogue_wo_load = sqrt((2*(W_total-W_payload))/(A_drogue*Cd_drogue*air_density));
+v_t_main_wo_load = sqrt((2*(W_total-W_payload))/(A_main*Cd_main*air_density));
+v_t_both_wo_load = sqrt((2*(W_total-W_payload))/(air_density*(A_drogue*Cd_drogue+A_main*Cd_main)));
 
 
 
@@ -90,6 +91,7 @@ h_current = 0;
 A_rocket = 0.96*pi*(diameter / 2)^2;%affective area of rocket
 v_y_current = 0;
 t = 0;
+F_d_ascent = 0;
 
 
 %   first 3.5 seconds:
@@ -106,15 +108,17 @@ M = 53.35; %Molar mass of dry air
 
 
 
+
 %simulates the flight with thrust
 while t < 3.5 
     t = t + delta_t;
     m_total = m_total - (rate_fuel_consumption * (delta_t));
     a_y_current = F_y_start / m_total;%m_total will change with time since fuel is being used up
     F_g_current = m_total * g;
-    p_height = p*(1 - (L*h_current)/288.15)^((g*M)/(R*L));
-    F_d_ascent = (1/2)*C_d_rocket*A_rocket*p_height*(a_y_current*t)^2;
-    F_d_ascent_y = (1/2)*C_d_rocket*A_rocket*p_height*(a_y_current*t)^2 * cos(launch_angle);
+    air_density_height = air_density*(1 - (L*h_current)/288.15)^((g*M)/(R*L));%not right, need to change
+    air_density = air_density_height/(53.35*air_temp);
+    F_d_ascent = (1/2)*C_d_rocket*A_rocket*air_density_height*(a_y_current*t)^2;
+    F_d_ascent_y = F_d_ascent * cos(launch_angle);
     F_y_start = F_thrust_y - (m_total*g) - F_d_ascent_y;
 
     h_current = h_current + v_y_current*(delta_t) + (1/2)*(a_y_current)*(delta_t)^2;
@@ -132,7 +136,7 @@ end
 
 %after thrust is done;
 F_y_after_thrust = ((-1)*(m_total*g)) - F_d_ascent;
-a_y_after_thrust = F_y_start / m_total;
+a_y_after_thrust = F_y_after_thrust / m_total;
 
 while v_y_current >= 0
     t = t+delta_t;
