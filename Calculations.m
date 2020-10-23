@@ -1,7 +1,7 @@
 %Constants:
 m_total = 1.087; %total mass (slugs)
 g = 32.17405; %accel due to gravity (ft/s^2)
-W_total = 40; %total weight (wet) (lbs)
+W_total = 43.19; %total weight (wet) (lbs)
 W_sec = (2/3)*(W_total); %weight of heaviest section
 m_sec = (W_sec)/(32.174); %mass of heaviest section
 air_density = 0.002376; %density of air at sea level
@@ -24,6 +24,8 @@ drogue_deployment_height = 5250;
 main_deployment_height = 600;
 C_d_rocket = 0.75;
 air_temp = 295.55; %air temperature in kelvins
+N_fins = 3; %number of fins
+KE_rule = 75; %ASK: why is this a rule?
 
 
 %questions:
@@ -66,9 +68,9 @@ D_drogue = 15/12;
 A_drogue = 0.96*pi*(D_drogue/2)^2;
 
 %   Terminal velocities:
-v_t_drogue = sqrt((2*W_total)/(A_drogue*Cd_drogue*air_density));
-v_t_main = sqrt((2*W_total)/(A_main*Cd_main*air_density));
-v_t_both = sqrt((2*W_total)/(air_density*(A_drogue*Cd_drogue+A_main*Cd_main)));
+v_t_drogue = sqrt((2*W_sec)/(A_drogue*Cd_drogue*air_density));
+v_t_main = sqrt((2*W_sec)/(A_main*Cd_main*air_density));
+v_t_both = sqrt((2*W_sec)/(air_density*(A_drogue*Cd_drogue+A_main*Cd_main)));
 %       Terminal velocities after payload release (probably won't need):
 v_t_drogue_wo_load = sqrt((2*(W_total-W_payload))/(A_drogue*Cd_drogue*air_density));
 v_t_main_wo_load = sqrt((2*(W_total-W_payload))/(A_main*Cd_main*air_density));
@@ -115,9 +117,9 @@ while t < 3.5
     m_total = m_total - (rate_fuel_consumption * (delta_t));
     a_y_current = F_y_start / m_total;%m_total will change with time since fuel is being used up
     F_g_current = m_total * g;
-    air_density_height = air_density*(1 - (L*h_current)/288.15)^((g*M)/(R*L));%not right, need to change
-    air_density = air_density_height/(53.35*air_temp);
-    F_d_ascent = (1/2)*C_d_rocket*A_rocket*air_density_height*(a_y_current*t)^2;
+    air_pressure_height = air_density*(1 - (L*h_current)/288.15)^((g*M)/(R*L));%not right, need to change
+    air_density = air_pressure_height/(53.35*air_temp);
+    F_d_ascent = (1/2)*C_d_rocket*A_rocket*air_pressure_height*(a_y_current*t)^2;
     F_d_ascent_y = F_d_ascent * cos(launch_angle);
     F_y_start = F_thrust_y - (m_total*g) - F_d_ascent_y;
 
@@ -152,6 +154,8 @@ stability_margin = (CP - CG)/diameter;
 
 
 %Center of Pressure:
+C_N_F = 2; %whatever this constant is
+
 
 
 %Center of Gravity:
@@ -164,6 +168,34 @@ KE_landing =(1/2)*((m_sec - m_payload)*(v_t_both^2));
 
 
 %Descent:
+F_d_descent = W_sec;
+h_main_deployment = 600;
+h_drogue = apogee - h_main_deployment; %height the rocket falls with only drogue deployed
+t_fallen_drogue = h_drogue / v_t_drogue;
+
+t_fallen_both = h_main_deployment / v_t_both;
+
+t_fallen_total = t_fallen_drogue + t_fallen_both;
+
+
 
 
 %Drift:
+
+%   5mph:
+v_wind_5mph = 7.33333; %v of wind at 5mph in ft/s
+dist_drift_5mph = t_fallen_total * v_wind_5mph; %distance the rocket drifts when wind is 5mph in feet
+
+%   10mph
+v_wind_10mph = 14.6667; %v of wind at 10mph in ft/s
+dist_drift_10mph = t_fallen_total * v_wind_10mph; %distance the rocket drifts when wind is 10mph in feet
+
+%   15mph
+v_wind_15mph = 22; %v of wind at 15mph in ft/s
+dist_drift_15mph = t_fallen_total * v_wind_15mph; %distance the rocket drifts when wind is 15mph in feet
+
+%   20mph
+v_wind_20mph = 22; %v of wind at 20mph in ft/s
+dist_drift_20mph = t_fallen_total * v_wind_20mph; %distance the rocket drifts when wind is 20mph in feet
+
+
