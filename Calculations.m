@@ -49,6 +49,8 @@ KE_rule = 75; %ASK: why is this a rule?
 W_fuel = 5.52; %weight of propellant in lbs
 m_fuel = W_fuel / 32.174;
 rate_fuel_consumption = m_fuel / 3.5;
+m_dry = m_total - m_fuel;
+W_dry = W_total - W_fuel;
 
 % will be calculated in script:
 
@@ -172,7 +174,7 @@ while v_y_current >= 0
     h_current = h_current + v_y_current*delta_t;
 end
 
-apogee = h_current;
+apogee = h_current - h_b;
 
 
 %Stability Margin:
@@ -239,5 +241,3 @@ dist_drift_15mph = t_fallen_total * v_wind_15mph; %distance the rocket drifts wh
 %   20mph
 v_wind_20mph = 22; %v of wind at 20mph in ft/s
 dist_drift_20mph = t_fallen_total * v_wind_20mph; %distance the rocket drifts when wind is 20mph in feet
-
-
