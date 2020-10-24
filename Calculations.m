@@ -115,13 +115,15 @@ M = 53.35; %Molar mass of dry air
 while t < 3.5 
     t = t + delta_t;
     m_total = m_total - (rate_fuel_consumption * (delta_t));
-    a_y_current = F_y_start / m_total;%m_total will change with time since fuel is being used up
     F_g_current = m_total * g;
+
+    
     air_pressure_height = air_density*(1 - (L*h_current)/288.15)^((g*M)/(R*L));%not right, need to change
     air_density = air_pressure_height/(53.35*air_temp);
-    F_d_ascent = (1/2)*C_d_rocket*A_rocket*air_pressure_height*(a_y_current*t)^2;
+    F_d_ascent = (1/2)*C_d_rocket*A_rocket*air_density*(v_y_current)^2;
     F_d_ascent_y = F_d_ascent * cos(launch_angle);
     F_y_start = F_thrust_y - (m_total*g) - F_d_ascent_y;
+    a_y_current = F_y_start / m_total;%m_total will change with time since fuel is being used up
 
     h_current = h_current + v_y_current*(delta_t) + (1/2)*(a_y_current)*(delta_t)^2;
 
