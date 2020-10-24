@@ -8,11 +8,11 @@ air_density = 0.002376; %density of air at sea level
 m_payload = 0.0226807; %mass of payload (slugs)
 W_payload = 0.729729946234; %weight of payload (lbs)
 launch_angle = 7.5;
-diameter = 5.5;
+diameter = 5.5; %diameter of rocket
 length_nose = 10;
-CP = 76;
-numFins = 3;
-CG = 64;
+CP_open_rocket = 76;
+
+CG_open_rocket = 64;
 length_forward_section = 49.5;
 length_mid_section = length_forward_section + 24;
 length_aft_section = length_mid_section + 31.5;
@@ -150,12 +150,28 @@ apogee = h_current;
 
 
 %Stability Margin:
-stability_margin = (CP - CG)/diameter;
+original_stability_margin = (CP_open_rocket - CG_open_rocket)/diameter;
 
 
 %Center of Pressure:
-C_N_F = 2; %whatever this constant is
+numFins = 3;
+L_N = 10; %length of nose in inches
+d_base_nose = 5.525; %diameter at base of nose in inches
+C_R = 8; %fin root chord
+C_T = 4; %fin tip chord
+fin_height = 5.5;
+fin_mid_chord = 2.5; 
+X_R = 2.5; %distance between fin root leading edge and fin tip leading edge parallel to body
+X_B = 87.936; %distance from nose tip to fin root chord leading edge
+R_body = diameter / 2;
+C_N_N = 2; %whatever this constant is
+X_N = 0.466*L_N; %whatever this constant is for Ogive noses
+C_N_F = (1+(R_body/(R_body + fin_height)))*((4*numFins*(fin_height/diameter)^2)/(1+sqrt(1+(2*fin_mid_chord)/((C_R+C_T)^2))));
+X_F = X_B + (X_R / 3)*((C_R+2*C_T)/(C_R+C_T)) + (1/6)*((C_R + C_T)-((C_R*C_T)/(C_R+C_T)));
+C_N_R = C_N_N + C_N_F;
+CP_from_nose_tip = ((C_N_N*X_N) + (C_N_F*X_F))/C_N_R;
 
+new_stability_margin = (CP_from_nose_tip - CG_open_rocket)/diameter;
 
 
 %Center of Gravity:
