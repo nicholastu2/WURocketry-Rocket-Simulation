@@ -1,7 +1,9 @@
+clear all;
 %Constants:
-m_total = 1.087; %total mass (slugs)
+
 g = 32.17405; %accel due to gravity (ft/s^2)
 W_total = 43.19; %total weight (wet) (lbs)
+m_total = W_total / g; %total mass (slugs)
 W_sec = (2/3)*(W_total); %weight of heaviest section
 m_sec = (W_sec)/(32.174); %mass of heaviest section
 air_density = 0.002376; %density of air at sea level
@@ -57,14 +59,14 @@ rate_fuel_consumption = m_fuel / 3.5;
 Cd_main = 2.2;
 A_adj_main = 0.96;
 r_main = 4.631; %min radius of main to achieve terminal velocity
-D_main = 4;
+D_main = 12;
 A_main = 0.96*pi*(D_main/2)^2;
 
 %   Drogue Parachute Constants:
 Cd_drogue = 1.5;
 A_adj_drogue = 0.96;
 r_drogue = 0.807; %min radius of drogue to achieve main deployment velocity
-D_drogue = 15/12;
+D_drogue = 18/12;
 A_drogue = 0.96*pi*(D_drogue/2)^2;
 
 %   Terminal velocities:
@@ -89,28 +91,36 @@ v_t_both_wo_load = sqrt((2*(W_total-W_payload))/(air_density*(A_drogue*Cd_drogue
 F_g_current = m_total* g;
 F_thrust_average = 293.3419504;%average thrust force in lbf
 F_thrust_y = F_thrust_average * cosd(launch_angle);
-h_current = 0;
+h_current = 600;
 A_rocket = 0.96*pi*(diameter / 2)^2;%affective area of rocket
 v_y_current = 0;
 t = 0;
 F_d_ascent = 0;
+h_above_ground = 0;
+v_y_initial = 0;
 
 
 %   first 3.5 seconds:
-F_y_start = F_thrust_y - F_g_current;
-a_y_current = F_y_start / m_total;
+F_y = F_thrust_y - F_g_current;
+a_y_current = F_y / m_total;
 v_x_current = 0;
 delta_t = 0.1;
 
 % atmospheric pressure constant:
-L = 0.0065;
-T = 288.15 - L*h_current;
-R = 0.730240507295273; %ideal gas constant
-M = 53.35; %Molar mass of dry air
+L_b = 0.0065;
+P_b = 29.21; %reference pressure of huntsville in inHg
+T_b = 290.928; %reference temperature of huntsville in kelvin
+R_universal = 8.9494596*10^4; %universal gas constant
+h_b = 600; %elevation of huntsville, AL in feet
+M_earth = 28.9644; %molar mass of earth's air\
+
+air_pressure_height = P_b*(T_b/(T_b+L_b*(h_current-h_b)))^((g*M_earth)/(R_universal*L_b));
 
 
 
 
+
+%% 
 %simulates the flight with thrust
 while t < 3.5 
     t = t + delta_t;
@@ -118,33 +128,47 @@ while t < 3.5
     F_g_current = m_total * g;
 
     
-    air_pressure_height = air_density*(1 - (L*h_current)/288.15)^((g*M)/(R*L));%not right, need to change
-    air_density = air_pressure_height/(53.35*air_temp);
-    F_d_ascent = (1/2)*C_d_rocket*A_rocket*air_density*(v_y_current)^2;
-    F_d_ascent_y = F_d_ascent * cos(launch_angle);
-    F_y_start = F_thrust_y - (m_total*g) - F_d_ascent_y;
-    a_y_current = F_y_start / m_total;%m_total will change with time since fuel is being used up
-
+    air_pressure_height = P_b*(T_b/(T_b+L_b*(h_current-h_b)))^((g*M_earth)/(R_universal*L_b));
+    air_density = air_pressure_height/(53.35*T_b);
+%     F_d_ascent = (1/2)*C_d_rocket*A_rocket*air_density*(v_y_current)^2; %may need to change
+%     F_d_ascent_y = F_d_ascent * cosd(launch_angle);
+    F_y = F_thrust_y - (m_total*g);% - F_d_ascent_y;
+    a_y_current = F_y / m_total;%m_total will change with time since fuel is being used up
+    
     h_current = h_current + v_y_current*(delta_t) + (1/2)*(a_y_current)*(delta_t)^2;
+    h_above_ground = h_current - h_b;
 
 
 
-    v_y_current = a_y_current * t;
-
+    v_y_current = v_y_current + a_y_current * delta_t;
+%     if t == 0.1
+%         v_y_initial = v_y_current;
+%     end
     %may not need:
     KE_ascent = (1/2)*(m_total)*v_y_current;
     U_ascent = m_total*g*h_current;
     E_rocket = KE_ascent+U_ascent;
 end
-
+% v_y_initial = v_y_current;
 
 %after thrust is done;
 F_y_after_thrust = ((-1)*(m_total*g)) - F_d_ascent;
 a_y_after_thrust = F_y_after_thrust / m_total;
+W_dry = m_total * g;
+v_terminal_rocket = sqrt(2*W_dry/(C_d_rocket*A_rocket*air_density));
+%% 
 
 while v_y_current >= 0
     t = t+delta_t;
-    v_y_current = v_y_current + a_y_after_thrust * t;
+%     v_y_current = v_terminal_rocket*((v_y_initial-v_terminal_rocket*tand(t*g/v_terminal_rocket))/(v_terminal_rocket+v_y_initial*tand(t*g/v_terminal_rocket)));
+%     h_current = ((v_terminal_rocket^2)/(2*g))*log((v_y_initial^2+v_terminal_rocket^2)/(v_y_current^2+v_terminal_rocket^2));
+    air_pressure_height = P_b*(T_b/(T_b+L_b*(h_current-h_b)))^((g*M_earth)/(R_universal*L_b));
+    air_density = air_pressure_height/(53.35*T_b);
+    F_d_ascent = (1/2)*C_d_rocket*A_rocket*air_density*(v_y_current)^2; %may need to change
+    F_d_ascent_y = F_d_ascent * cosd(launch_angle);
+    F_y_after_thrust = ((-1)*(m_total*g)) - F_d_ascent_y;
+    a_y_after_thrust = F_y_after_thrust / m_total;
+    v_y_current = v_y_current + a_y_after_thrust * delta_t;
     h_current = h_current + v_y_current*delta_t;
 end
 
