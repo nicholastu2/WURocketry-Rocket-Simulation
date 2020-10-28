@@ -61,7 +61,7 @@ W_dry = W_total - W_fuel;
 Cd_main = 2.2;
 A_adj_main = 0.96;
 r_main = 4.631; %min radius of main to achieve terminal velocity
-D_main = 12;
+D_main = 144/12;
 A_main = 0.96*pi*(D_main/2)^2;
 
 %   Drogue Parachute Constants:
@@ -91,7 +91,7 @@ v_t_both_wo_load = sqrt((2*(W_total-W_payload))/(air_density*(A_drogue*Cd_drogue
 
 %Rocket Flight (ascent):
 F_g_current = m_total* g;
-F_thrust_average = 293.3419504;%average thrust force in lbf
+F_thrust_average = 293.3435561881854;%average thrust force in lbf
 F_thrust_y = F_thrust_average * cosd(launch_angle);
 h_current = 600;
 A_rocket = 0.96*pi*(diameter / 2)^2;%affective area of rocket
@@ -136,13 +136,13 @@ while t < 3.5
 %     F_d_ascent_y = F_d_ascent * cosd(launch_angle);
     F_y = F_thrust_y - (m_total*g);% - F_d_ascent_y;
     a_y_current = F_y / m_total;%m_total will change with time since fuel is being used up
-    
+    v_y_current = v_y_current + a_y_current * delta_t;
     h_current = h_current + v_y_current*(delta_t) + (1/2)*(a_y_current)*(delta_t)^2;
     h_above_ground = h_current - h_b;
 
 
 
-    v_y_current = v_y_current + a_y_current * delta_t;
+
 %     if t == 0.1
 %         v_y_initial = v_y_current;
 %     end
@@ -188,7 +188,7 @@ d_base_nose = 5.525; %diameter at base of nose in inches
 C_R = 8; %fin root chord
 C_T = 4; %fin tip chord
 fin_height = 5.5;
-fin_mid_chord = 2.5; 
+fin_mid_chord = 5.522680509; 
 X_R = 2.5; %distance between fin root leading edge and fin tip leading edge parallel to body
 X_B = 87.936; %distance from nose tip to fin root chord leading edge
 R_body = diameter / 2;
@@ -200,6 +200,7 @@ C_N_R = C_N_N + C_N_F;
 CP_from_nose_tip = ((C_N_N*X_N) + (C_N_F*X_F))/C_N_R;
 
 new_stability_margin = (CP_from_nose_tip - CG_open_rocket)/diameter;
+
 
 
 %Center of Gravity:
@@ -239,5 +240,5 @@ v_wind_15mph = 22; %v of wind at 15mph in ft/s
 dist_drift_15mph = t_fallen_total * v_wind_15mph; %distance the rocket drifts when wind is 15mph in feet
 
 %   20mph
-v_wind_20mph = 22; %v of wind at 20mph in ft/s
+v_wind_20mph = 29.3333; %v of wind at 20mph in ft/s
 dist_drift_20mph = t_fallen_total * v_wind_20mph; %distance the rocket drifts when wind is 20mph in feet
