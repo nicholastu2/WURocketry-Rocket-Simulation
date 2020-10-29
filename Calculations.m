@@ -76,9 +76,9 @@ v_t_drogue = sqrt((2*W_sec)/(A_drogue*Cd_drogue*air_density));
 v_t_main = sqrt((2*W_sec)/(A_main*Cd_main*air_density));
 v_t_both = sqrt((2*W_sec)/(air_density*(A_drogue*Cd_drogue+A_main*Cd_main)));
 %       Terminal velocities after payload release (probably won't need):
-v_t_drogue_wo_load = sqrt((2*(W_total-W_payload))/(A_drogue*Cd_drogue*air_density));
-v_t_main_wo_load = sqrt((2*(W_total-W_payload))/(A_main*Cd_main*air_density));
-v_t_both_wo_load = sqrt((2*(W_total-W_payload))/(air_density*(A_drogue*Cd_drogue+A_main*Cd_main)));
+% v_t_drogue_wo_load = sqrt((2*(W_total-W_payload))/(A_drogue*Cd_drogue*air_density));
+% v_t_main_wo_load = sqrt((2*(W_total-W_payload))/(A_main*Cd_main*air_density));
+% v_t_both_wo_load = sqrt((2*(W_total-W_payload))/(air_density*(A_drogue*Cd_drogue+A_main*Cd_main)));
 
 
 
@@ -124,7 +124,7 @@ air_pressure_height = P_b*(T_b/(T_b+L_b*(h_current-h_b)))^((g*M_earth)/(R_univer
 
 %% 
 %simulates the flight with thrust
-while t < 3.5 
+while t <= 3.5 
     t = t + delta_t;
     m_total = m_total - (rate_fuel_consumption * (delta_t));
     F_g_current = m_total * g;
@@ -162,15 +162,13 @@ v_terminal_rocket = sqrt(2*W_dry/(C_d_rocket*A_rocket*air_density));
 
 while v_y_current >= 0
     t = t+delta_t;
-%     v_y_current = v_terminal_rocket*((v_y_initial-v_terminal_rocket*tand(t*g/v_terminal_rocket))/(v_terminal_rocket+v_y_initial*tand(t*g/v_terminal_rocket)));
-%     h_current = ((v_terminal_rocket^2)/(2*g))*log((v_y_initial^2+v_terminal_rocket^2)/(v_y_current^2+v_terminal_rocket^2));
+    v_y_current = v_y_current + a_y_after_thrust * delta_t;
     air_pressure_height = P_b*(T_b/(T_b+L_b*(h_current-h_b)))^((g*M_earth)/(R_universal*L_b));
     air_density = air_pressure_height/(53.35*T_b);
     F_d_ascent = (1/2)*C_d_rocket*A_rocket*air_density*(v_terminal_rocket)^2; %may need to change
     F_d_ascent_y = F_d_ascent * cosd(launch_angle);
     F_y_after_thrust = ((-1)*(m_total*g)) - F_d_ascent_y;
     a_y_after_thrust = F_y_after_thrust / m_total;
-    v_y_current = v_y_current + a_y_after_thrust * delta_t;
     h_current = h_current + v_y_current*delta_t;
 end
 
