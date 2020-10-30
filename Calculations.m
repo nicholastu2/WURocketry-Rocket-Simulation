@@ -61,7 +61,7 @@ W_dry = W_total - W_fuel;
 Cd_main = 2.2;
 A_adj_main = 0.96;
 r_main = 4.631; %min radius of main to achieve terminal velocity
-D_main = 144/12;
+D_main = 72/12;
 A_main = 0.96*pi*(D_main/2)^2;
 
 %   Drogue Parachute Constants:
